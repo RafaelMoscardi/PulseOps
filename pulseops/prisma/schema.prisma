@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services      MonitoredService[]
+  notifications Notification[]
+}
+
+model MonitoredService {
+  id              String   @id @default(cuid())
+  name            String
+  url             String
+  intervalMinutes Int      @default(5)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lastStatus     String?
+  lastCheckedAt  DateTime?
+  lastStatusCode Int?
+  lastResponseMs Int?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  checks    CheckResult[]
+  incidents Incident[]
+}
+
+model CheckResult {
+  id         String   @id @default(cuid())
+  isOnline   Boolean
+  statusCode Int?
+  responseMs Int?
+  error      String?
+  checkedAt  DateTime @default(now())
+
+  serviceId String
+  service   MonitoredService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model Incident {
+  id         String    @id @default(cuid())
+  startedAt  DateTime  @default(now())
+  resolvedAt DateTime?
+  isResolved Boolean   @default(false)
+
+  serviceId     String
+  service       MonitoredService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  notifications Notification[]
+}
+
+model Notification {
+  id      String   @id @default(cuid())
+  type    String
+  message String
+  success Boolean  @default(true)
+  sentAt  DateTime @default(now())
+
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incidentId String?
+  incident   Incident? @relation(fields: [incidentId], references: [id])
+}

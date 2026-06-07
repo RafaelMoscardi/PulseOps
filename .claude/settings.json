@@ -1,0 +1,44 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(code-review:code-review)",
+      "Skill(code-review:code-review:*)",
+      "Skill(run)",
+      "Skill(run:*)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_fill_form",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "PowerShell(netstat -an)",
+      "PowerShell(Get-Service | Where-Object { $_.DisplayName -match 'postgres|sql' } | Select-Object Name, DisplayName, Status)",
+      "PowerShell(docker --version 2>&1)",
+      "PowerShell(winget --version 2>&1)",
+      "PowerShell(choco --version 2>&1)",
+      "PowerShell(winget install PostgreSQL.PostgreSQL --accept-source-agreements --accept-package-agreements 2>&1)",
+      "PowerShell(choco install postgresql --params '/Password:postgres' -y 2>&1)",
+      "PowerShell(refreshenv 2>&1)",
+      "PowerShell($env:PGPASSWORD = 'postgres'; & \"C:\\\\Program Files\\\\PostgreSQL\\\\18\\\\bin\\\\psql.exe\" -U postgres -c \"ALTER USER postgres WITH PASSWORD 'password'; CREATE DATABASE pulseops;\" 2>&1)",
+      "Read(//c/Users/Administrator/AppData/Local/Temp/chocolatey/**)",
+      "Read(//c/Program Files/PostgreSQL/18/data/**)",
+      "PowerShell(Restart-Service -Name \"postgresql-x64-18\" -Force 2>&1)",
+      "PowerShell(Get-Service -Name \"postgresql-x64-18\")",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\PostgreSQL\\\\18\\\\data\\\\log\\\\\" | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | ForEach-Object { Get-Content $_.FullName -Tail 20 })",
+      "PowerShell(Start-Service -Name \"postgresql-x64-18\")",
+      "PowerShell($env:PGPASSWORD = ''; & \"C:\\\\Program Files\\\\PostgreSQL\\\\18\\\\bin\\\\psql.exe\" -U postgres -h 127.0.0.1 -c \"ALTER USER postgres WITH PASSWORD 'password'; CREATE DATABASE pulseops;\" 2>&1)",
+      "PowerShell($env:PGPASSWORD = ''; & \"C:\\\\Program Files\\\\PostgreSQL\\\\18\\\\bin\\\\createdb.exe\" -U postgres -h 127.0.0.1 pulseops 2>&1)",
+      "PowerShell($env:PGPASSWORD = 'password'; & \"C:\\\\Program Files\\\\PostgreSQL\\\\18\\\\bin\\\\psql.exe\" -U postgres -h 127.0.0.1 -d pulseops -c \"\\\\conninfo\" 2>&1)",
+      "PowerShell(Get-Process | Where-Object { $_.MainWindowTitle -match 'node|next' -or $_.ProcessName -eq 'node' } | Where-Object { $_.Id -eq 7248 } | Stop-Process -Force 2>&1; Start-Sleep -Seconds 1; Write-Host \"killed\")",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "PowerShell(Get-Process node)",
+      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)",
+      "Bash(npx prisma *)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Id 11116 -Force)",
+      "PowerShell(cd C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\\\\pulseops; Start-Process -FilePath \"powershell\" -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Minimized)",
+      "PowerShell(cd C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\\\\pulseops; Start-Process -FilePath \"powershell\" -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Minimized; $timeout = 40; $elapsed = 0; do { Start-Sleep -Seconds 2; $elapsed += 2; $conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue } while \\(-not $conn -and $elapsed -lt $timeout\\); if \\($conn\\) { \"Ready\" } else { \"Timeout\" })"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\Administrator\\Documents\\GitHub\\PulseOps"
+    ]
+  }
+}

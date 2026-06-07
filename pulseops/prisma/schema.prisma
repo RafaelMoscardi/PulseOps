@@ -15,6 +15,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  discordWebhookUrl String?
+
   services      MonitoredService[]
   notifications Notification[]
 }
@@ -57,6 +59,7 @@ model Incident {
   startedAt  DateTime  @default(now())
   resolvedAt DateTime?
   isResolved Boolean   @default(false)
+  reason     String?
 
   serviceId     String
   service       MonitoredService @relation(fields: [serviceId], references: [id], onDelete: Cascade)

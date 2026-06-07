@@ -16,6 +16,10 @@ export default async function ServicesPage() {
         take: 1,
         orderBy: { checkedAt: 'desc' },
       },
+      incidents: {
+        where: { isResolved: false },
+        take: 1,
+      },
     },
   })
 

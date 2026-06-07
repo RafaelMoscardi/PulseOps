@@ -1,14 +1,16 @@
 import Link from 'next/link'
-import type { MonitoredService, CheckResult } from '@/generated/prisma/client'
+import type { MonitoredService, CheckResult, Incident } from '@/generated/prisma/client'
 import { DeleteButton } from './DeleteButton'
 import { ToggleActive } from './ToggleActive'
+import { CheckNowButton } from './CheckNowButton'
 
-type ServiceWithLastCheck = MonitoredService & {
+type ServiceWithIncludes = MonitoredService & {
   checks: CheckResult[]
+  incidents: Incident[]
 }
 
 interface ServiceCardProps {
-  service: ServiceWithLastCheck
+  service: ServiceWithIncludes
 }
 
 function StatusBadge({ check }: { check: CheckResult | undefined }) {
@@ -44,6 +46,7 @@ function formatDate(date: Date): string {
 
 export function ServiceCard({ service }: ServiceCardProps) {
   const lastCheck = service.checks[0]
+  const openIncident = service.incidents[0]
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4">
@@ -54,9 +57,25 @@ export function ServiceCard({ service }: ServiceCardProps) {
             <StatusBadge check={lastCheck} />
             <span className="text-gray-300">·</span>
             <ToggleActive serviceId={service.id} isActive={service.isActive} />
+            {openIncident && (
+              <>
+                <span className="text-gray-300">·</span>
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  </svg>
+                  Incidente aberto
+                </span>
+              </>
+            )}
           </div>
 
-          <h3 className="text-sm font-semibold text-gray-900 truncate">{service.name}</h3>
+          <Link
+            href={`/services/${service.id}`}
+            className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
+          >
+            {service.name}
+          </Link>
 
           <a
             href={service.url}
@@ -90,6 +109,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
 
         {/* Right: actions */}
         <div className="flex items-center gap-1 shrink-0">
+          <CheckNowButton serviceId={service.id} />
           <Link
             href={`/services/${service.id}/edit`}
             className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"

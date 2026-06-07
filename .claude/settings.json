@@ -35,7 +35,13 @@
       "PowerShell(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue)",
       "PowerShell(Stop-Process -Id 11116 -Force)",
       "PowerShell(cd C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\\\\pulseops; Start-Process -FilePath \"powershell\" -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Minimized)",
-      "PowerShell(cd C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\\\\pulseops; Start-Process -FilePath \"powershell\" -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Minimized; $timeout = 40; $elapsed = 0; do { Start-Sleep -Seconds 2; $elapsed += 2; $conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue } while \\(-not $conn -and $elapsed -lt $timeout\\); if \\($conn\\) { \"Ready\" } else { \"Timeout\" })"
+      "PowerShell(cd C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\\\\pulseops; Start-Process -FilePath \"powershell\" -ArgumentList \"-NoExit\", \"-Command\", \"npm run dev\" -WindowStyle Minimized; $timeout = 40; $elapsed = 0; do { Start-Sleep -Seconds 2; $elapsed += 2; $conn = Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue } while \\(-not $conn -and $elapsed -lt $timeout\\); if \\($conn\\) { \"Ready\" } else { \"Timeout\" })",
+      "Bash(ls \"C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\\\\\" 2>/dev/null)",
+      "Read(//c/Users/Administrator/Documents/GitHub/PulseOps\" 2>/dev/**)",
+      "PowerShell(robocopy $src $dst /E /COPYALL /NFL /NDL /NJH /NJS 2>&1)",
+      "PowerShell($src = \"C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\\\\pulseops\")",
+      "PowerShell($dst = \"C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Administrator\\\\Documents\\\\GitHub\\\\PulseOps\" -Force | Where-Object { $_.Name -ne '.git' -and $_.Name -ne '.claude' -and $_.Name -ne 'pulseops' } | Select-Object Name)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Administrator\\Documents\\GitHub\\PulseOps"

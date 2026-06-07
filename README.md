@@ -1,133 +1,199 @@
 # PulseOps
 
-Plataforma de monitoramento de APIs e sites — construída para portfólio de Engenharia de Software.
+> Uptime monitoring for APIs and websites — automatic checks, incident tracking, Discord alerts.
 
-## O que é
+Built with **Next.js 16**, **Prisma 7**, **PostgreSQL**, and **Tailwind CSS**.
 
-O PulseOps permite cadastrar serviços web (URLs de APIs ou sites) e monitora periodicamente se estão online, mede tempo de resposta, registra histórico de verificações, calcula uptime e exibe tudo em um dashboard com gráficos.
+---
 
-## Stack
+## Features
 
-| Camada | Tecnologia |
-|--------|-----------|
-| Framework | Next.js 16 (App Router) + TypeScript |
-| Banco de dados | PostgreSQL |
-| ORM | Prisma 7 |
-| Autenticação | NextAuth v4 (JWT + bcrypt) |
-| Estilo | Tailwind CSS |
-| Gráficos | Recharts (Fase 4) |
-| Monitoramento | node-cron (Fase 3) |
+- **Automated HTTP monitoring** — configurable check intervals (1–60 min), runs on server startup via `instrumentation.ts`
+- **Incident management** — auto-creates and resolves incidents with duration tracking and root cause
+- **Response time chart** — sparkline showing the last 50 checks per service
+- **90-day uptime grid** — daily uptime heatmap (GitHub contribution style)
+- **Discord webhook alerts** — notifies on service down and recovery; no duplicate alerts
+- **Per-user isolation** — every user only sees and modifies their own data
+- **Manual check** — trigger an immediate check from the UI at any time
 
-## Funcionalidades (por fase)
+---
 
-- **Fase 1** ✅ — Setup, Prisma, autenticação, dashboard base
-- **Fase 2** ✅ — CRUD completo de serviços monitorados
-- **Fase 3** — Engine de monitoramento (cron + HTTP checker)
-- **Fase 4** — Dashboard com gráficos e uptime
-- **Fase 5** — Incidentes e estrutura de notificações
+## Tech Stack
 
-## Rodando localmente
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16.2 (App Router, TypeScript) |
+| Database ORM | Prisma 7.8 (prisma-client generator) |
+| Database | PostgreSQL 16+ |
+| Auth | NextAuth v4 (JWT strategy, bcrypt passwords) |
+| Scheduler | node-cron v4 via `instrumentation.ts` |
+| Styling | Tailwind CSS v4 |
+| Charts | Pure SVG (no external chart library) |
 
-### Pré-requisitos
+---
+
+## Quick Start
+
+### Prerequisites
 
 - Node.js 20+
-- PostgreSQL 15+
+- PostgreSQL 16+ running locally
 
-### Configuração
+### Steps
 
 ```bash
-# 1. Clone o repositório
-git clone <url>
-cd PulseOps/pulseops
-
-# 2. Instale as dependências
+# 1. Clone and install dependencies
+git clone https://github.com/your-username/pulseops.git
+cd pulseops
 npm install
 
-# 3. Configure as variáveis de ambiente
+# 2. Configure environment
 cp .env.example .env
-# Edite .env com suas credenciais do PostgreSQL
+# Edit .env with your DATABASE_URL and a random NEXTAUTH_SECRET
 
-# 4. (já incluso) Prisma 7 usa @prisma/adapter-pg — já está no package.json
+# 3. Create database and apply schema
+npx prisma db push
 
-# 5. Gere o client Prisma e execute as migrations
-npx prisma generate
-npx prisma migrate dev --name init
+# 4. (Optional) Seed demo data
+npm run seed
 
-# 6. Inicie o servidor de desenvolvimento
+# 5. Start development server
 npm run dev
 ```
 
-Acesse `http://localhost:3000` — você será redirecionado para o login.
+Open [http://localhost:3000](http://localhost:3000).
 
-## Serviços Monitorados (Fase 2)
+---
 
-A tela `/services` permite gerenciar todos os endpoints monitorados:
+## Demo Account
 
-| Ação | Descrição |
-|------|-----------|
-| Listar | Exibe nome, URL, status, intervalo e data de criação |
-| Criar | Formulário em `/services/new` com validação de URL e intervalo |
-| Editar | Formulário em `/services/[id]/edit` com dados pré-preenchidos |
-| Excluir | Botão com confirmação inline (evita exclusão acidental) |
-| Ativar/Inativar | Toggle direto no card — sem precisar abrir o formulário |
+After running `npm run seed`:
 
-Todas as operações verificam a propriedade do serviço — um usuário nunca acessa dados de outro.
+| Field | Value |
+|---|---|
+| Email | `demo@pulseops.dev` |
+| Password | `demo123456` |
 
-## Estrutura do projeto
+The seed creates 4 monitored services with 30 days of historical check data and incidents.
 
-```
-pulseops/
-├── prisma/
-│   ├── schema.prisma          # Modelos: User, MonitoredService, CheckResult, Incident, Notification
-│   └── migrations/
-├── src/
-│   ├── app/
-│   │   ├── (auth)/            # Login e cadastro (rotas públicas)
-│   │   ├── (dashboard)/
-│   │   │   ├── dashboard/     # Dashboard principal
-│   │   │   └── services/      # CRUD de serviços
-│   │   │       ├── page.tsx   # Listagem
-│   │   │       ├── new/       # Criar serviço
-│   │   │       └── [id]/edit/ # Editar serviço
-│   │   ├── actions/
-│   │   │   ├── auth.ts        # Server Actions de autenticação
-│   │   │   └── services.ts    # Server Actions de CRUD de serviços
-│   │   └── api/auth/          # NextAuth route handler
-│   ├── components/
-│   │   ├── layout/            # Sidebar e Header
-│   │   ├── providers/         # SessionProvider
-│   │   └── services/
-│   │       ├── ServiceCard.tsx    # Card de serviço na listagem
-│   │       ├── ServiceForm.tsx    # Formulário reutilizável (criar/editar)
-│   │       ├── DeleteButton.tsx   # Botão de exclusão com confirmação
-│   │       └── ToggleActive.tsx   # Toggle ativo/inativo com optimistic update
-│   ├── lib/
-│   │   ├── auth.ts            # Config NextAuth
-│   │   └── prisma.ts          # Prisma Client singleton (adapter-pg)
-│   ├── types/                 # TypeScript types
-│   └── proxy.ts               # Proteção de rotas (Next.js 16)
-└── .env.example
+---
+
+## Environment Variables
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `NEXTAUTH_SECRET` | JWT signing secret — min 32 chars in production |
+| `NEXTAUTH_URL` | Base URL of the app (e.g. `http://localhost:3000`) |
+
+Generate a secret:
+```bash
+openssl rand -base64 32
 ```
 
-## Modelos do banco
+---
+
+## Project Structure
 
 ```
-User → MonitoredService → CheckResult
-                       → Incident → Notification
-User → Notification
+src/
+├── app/
+│   ├── (auth)/           # Login and register pages
+│   └── (dashboard)/      # Protected app pages
+│       ├── dashboard/    # Overview stats
+│       ├── services/     # CRUD + detail with charts
+│       ├── incidents/    # Incident history
+│       └── settings/     # Discord webhook config
+├── components/
+│   ├── charts/           # ResponseTimeChart, UptimeGrid (pure SVG)
+│   ├── layout/           # Sidebar, Header
+│   └── services/         # ServiceCard, CheckNowButton, etc.
+├── lib/
+│   ├── auth.ts           # NextAuth config
+│   ├── discord.ts        # Webhook helpers (validate, mask, send)
+│   ├── monitor.ts        # performCheck() — core monitoring logic
+│   ├── prisma.ts         # Prisma client singleton
+│   └── scheduler.ts      # node-cron scheduler
+├── instrumentation.ts    # Starts scheduler on server boot
+└── proxy.ts              # Route protection (replaces middleware.ts)
+prisma/
+├── schema.prisma
+├── seed.ts
+└── prisma.config.ts
 ```
 
-## Observações técnicas
+---
 
-- **Next.js 16**: o arquivo de proteção de rotas chama-se `proxy.ts` (renomeado de `middleware.ts`)
-- **Prisma 7**: o client é gerado em `src/generated/prisma` e importado de `@/generated/prisma`
-- **Auth**: sessão JWT via NextAuth, senha hasheada com bcrypt (12 rounds)
-- **Segurança**: cada usuário só acessa seus próprios serviços — verificado em todas as queries
+## How Monitoring Works
 
-## Variáveis de ambiente
+1. **Boot** — `instrumentation.ts` calls `startScheduler()` once per process
+2. **Tick** — node-cron fires every minute (`* * * * *`)
+3. **Filter** — only services where `now - lastCheckedAt >= intervalMinutes` are checked
+4. **HTTP check** — GET request with 10s timeout
+5. **Persist** — saves `CheckResult`, updates `MonitoredService` status fields
+6. **Incidents** — opens incident on first failure; resolves when service recovers
+7. **Alerts** — sends Discord embed after transaction; deduplication via `Notification` table
 
-| Variável | Descrição |
-|----------|-----------|
-| `DATABASE_URL` | Connection string PostgreSQL |
-| `NEXTAUTH_SECRET` | Secret para assinar os JWTs (gere com `openssl rand -base64 32`) |
-| `NEXTAUTH_URL` | URL base da aplicação |
+### Error mapping
+
+| Error | `error` field |
+|---|---|
+| Timeout > 10s | `Timeout após 10s` |
+| `ENOTFOUND` | `DNS não resolvido` |
+| `ECONNREFUSED` | `Conexão recusada` |
+| HTTP 5xx | `HTTP 5xx` |
+| HTTP 1–4xx | `isOnline = true` |
+
+---
+
+## Screenshots
+
+> _Add screenshots to `docs/screenshots/` and reference them here._
+
+| Dashboard | Service Detail |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Service Detail](docs/screenshots/service-detail.png) |
+
+---
+
+## Deploying to Vercel
+
+### Prerequisites
+
+A PostgreSQL database accessible from the internet — [Neon](https://neon.tech) (free tier) or [Supabase](https://supabase.com) work well.
+
+### Steps
+
+1. Push the repo to GitHub
+2. Import the project in Vercel
+3. Set environment variables in the Vercel dashboard:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Your cloud PostgreSQL connection string |
+| `NEXTAUTH_SECRET` | Random 32-char string |
+| `NEXTAUTH_URL` | Your Vercel deployment URL (e.g. `https://pulseops.vercel.app`) |
+
+4. After first deploy, run migrations:
+```bash
+npx prisma db push
+```
+
+5. (Optional) seed demo data:
+```bash
+npm run seed
+```
+
+### Monitoring on Vercel
+
+On Vercel, `node-cron` doesn't persist between serverless invocations. Monitoring is handled instead by a **Vercel Cron Job** defined in `vercel.json` that calls `/api/cron/monitor` every minute.
+
+Vercel automatically injects `CRON_SECRET` and passes it as a Bearer token — no manual setup required.
+
+> **Note:** Vercel Cron Jobs require the **Pro** plan for sub-minute frequency, or are limited to once per day on the Hobby plan. For Hobby, set `"schedule": "*/5 * * * *"` (every 5 minutes) in `vercel.json`.
+
+---
+
+## License
+
+MIT

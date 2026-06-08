@@ -144,7 +144,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           {
             label: 'Status',

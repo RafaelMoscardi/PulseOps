@@ -13,88 +13,115 @@ interface ServiceCardProps {
   service: ServiceWithIncludes
 }
 
-function StatusBadge({ check }: { check: CheckResult | undefined }) {
-  if (!check) {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-400">
-        <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-        Aguardando
-      </span>
-    )
-  }
-  if (check.isOnline) {
-    return (
-      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-green-600">
-        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-        Online {check.responseMs != null ? `· ${check.responseMs}ms` : ''}
-      </span>
-    )
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600">
-      <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-      Offline {check.statusCode ? `· ${check.statusCode}` : ''}
-    </span>
-  )
-}
-
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(
-    new Date(date)
-  )
-}
-
 export function ServiceCard({ service }: ServiceCardProps) {
   const lastCheck = service.checks[0]
   const openIncident = service.incidents[0]
 
+  const isOnline = lastCheck?.isOnline === true
+  const isOffline = lastCheck?.isOnline === false
+  const hasCheck = !!lastCheck
+
+  const leftBorderColor = !hasCheck
+    ? 'var(--c-dim)'
+    : isOnline
+    ? 'var(--c-online)'
+    : 'var(--c-offline)'
+
+  const statusColor = !hasCheck
+    ? 'var(--c-muted)'
+    : isOnline
+    ? 'var(--c-online)'
+    : 'var(--c-offline)'
+
+  const statusLabel = !hasCheck ? 'AGUARDANDO' : isOnline ? 'ONLINE' : 'OFFLINE'
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-5 py-4">
+    <div
+      className="rounded-xl border border-l-2 px-5 py-4 transition-colors"
+      style={{
+        background: 'var(--c-surface)',
+        borderColor: 'var(--c-border)',
+        borderLeftColor: leftBorderColor,
+      }}
+    >
       <div className="flex items-start justify-between gap-4">
-        {/* Left: info */}
+        {/* Left */}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <StatusBadge check={lastCheck} />
-            <span className="text-gray-300">·</span>
-            <ToggleActive serviceId={service.id} isActive={service.isActive} />
-            {openIncident && (
-              <>
-                <span className="text-gray-300">·</span>
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                  </svg>
-                  Incidente aberto
+          {/* Status row */}
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span
+              className="text-[11px] font-semibold tracking-widest"
+              style={{
+                color: statusColor,
+                fontFamily: 'var(--font-ibm-mono)',
+              }}
+            >
+              {statusLabel}
+              {hasCheck && lastCheck.responseMs != null && isOnline && (
+                <span style={{ color: 'var(--c-muted)' }}>
+                  {' '}· {lastCheck.responseMs}ms
                 </span>
-              </>
+              )}
+              {hasCheck && isOffline && lastCheck.statusCode && (
+                <span style={{ color: 'var(--c-muted)' }}>
+                  {' '}· {lastCheck.statusCode}
+                </span>
+              )}
+            </span>
+
+            <ToggleActive serviceId={service.id} isActive={service.isActive} />
+
+            {openIncident && (
+              <span
+                className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
+                style={{
+                  color: 'var(--c-warning)',
+                  borderColor: 'rgba(251,146,60,0.3)',
+                  background: 'rgba(251,146,60,0.08)',
+                }}
+              >
+                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                Incidente aberto
+              </span>
             )}
           </div>
 
+          {/* Service name */}
           <Link
             href={`/services/${service.id}`}
-            className="text-sm font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
+            className="text-sm font-semibold transition-colors block"
+            style={{ color: 'var(--c-text)' }}
           >
             {service.name}
           </Link>
 
+          {/* URL */}
           <a
             href={service.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-gray-400 hover:text-indigo-600 transition-colors truncate block mt-0.5"
+            className="text-xs truncate block mt-0.5 transition-colors"
+            style={{ color: 'var(--c-muted)' }}
           >
             {service.url}
           </a>
 
-          <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-gray-400">
-            <span>Verificar a cada {service.intervalMinutes} min</span>
-            <span>·</span>
-            <span>Criado em {formatDate(service.createdAt)}</span>
+          {/* Meta */}
+          <div
+            className="flex flex-wrap items-center gap-2 mt-2 text-[11px]"
+            style={{
+              color: 'var(--c-dim)',
+              fontFamily: 'var(--font-ibm-mono)',
+            }}
+          >
+            <span>cada {service.intervalMinutes}min</span>
             {lastCheck && (
               <>
-                <span>·</span>
+                <span style={{ color: 'var(--c-border)' }}>·</span>
                 <span>
-                  Última checagem:{' '}
+                  última:{' '}
                   {new Intl.DateTimeFormat('pt-BR', {
                     day: '2-digit',
                     month: '2-digit',
@@ -107,12 +134,13 @@ export function ServiceCard({ service }: ServiceCardProps) {
           </div>
         </div>
 
-        {/* Right: actions */}
+        {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
           <CheckNowButton serviceId={service.id} />
           <Link
             href={`/services/${service.id}/edit`}
-            className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+            className="rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors"
+            style={{ color: 'var(--c-muted)' }}
           >
             Editar
           </Link>

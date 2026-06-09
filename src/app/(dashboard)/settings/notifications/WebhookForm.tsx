@@ -10,6 +10,13 @@ type Props = {
 
 const initialState = { error: undefined as string | undefined, success: undefined as boolean | undefined }
 
+const inputClass = [
+  'w-full rounded-lg px-3 py-2.5 text-sm transition-colors',
+  'text-slate-200 placeholder-[#334155]',
+  'bg-[#0f1822] border border-[#1e3048]',
+  'focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500',
+].join(' ')
+
 export function WebhookForm({ maskedUrl, isConfigured }: Props) {
   const [saveState, saveAction] = useActionState(saveWebhook, initialState)
   const [testPending, startTest] = useTransition()
@@ -32,19 +39,55 @@ export function WebhookForm({ maskedUrl, isConfigured }: Props) {
 
   return (
     <div className="space-y-4">
+      {/* Configured badge */}
       {isConfigured && maskedUrl && (
-        <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
-          <div className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+        <div
+          className="flex items-center gap-3 rounded-lg border px-4 py-3"
+          style={{
+            background: 'rgba(34,211,238,0.05)',
+            borderColor: 'rgba(34,211,238,0.2)',
+          }}
+        >
+          <span
+            className="relative flex h-2 w-2 shrink-0"
+          >
+            <span
+              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60"
+              style={{ background: 'var(--c-online)' }}
+            />
+            <span
+              className="relative inline-flex rounded-full h-2 w-2"
+              style={{ background: 'var(--c-online)' }}
+            />
+          </span>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium text-green-800">Webhook configurado</p>
-            <p className="text-xs text-green-700 font-mono mt-0.5 truncate">{maskedUrl}</p>
+            <p
+              className="text-[10px] font-semibold tracking-widest uppercase"
+              style={{ color: 'var(--c-online)' }}
+            >
+              Webhook configurado
+            </p>
+            <p
+              className="text-xs mt-0.5 truncate"
+              style={{
+                color: 'var(--c-muted)',
+                fontFamily: 'var(--font-ibm-mono)',
+              }}
+            >
+              {maskedUrl}
+            </p>
           </div>
         </div>
       )}
 
+      {/* Save form */}
       <form action={saveAction} className="space-y-3">
         <div>
-          <label htmlFor="webhookUrl" className="block text-xs font-medium text-gray-700 mb-1.5">
+          <label
+            htmlFor="webhookUrl"
+            className="block text-[11px] font-semibold tracking-widest uppercase mb-1.5"
+            style={{ color: 'var(--c-muted)' }}
+          >
             {isConfigured ? 'Alterar webhook' : 'URL do Webhook'}
           </label>
           <input
@@ -52,40 +95,64 @@ export function WebhookForm({ maskedUrl, isConfigured }: Props) {
             name="webhookUrl"
             type="url"
             placeholder="https://discord.com/api/webhooks/…"
-            className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent placeholder-gray-400"
+            className={inputClass}
             required
           />
         </div>
 
         {saveState?.error && (
-          <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+          <p
+            className="text-xs rounded-lg border px-3 py-2"
+            style={{
+              color: 'var(--c-offline)',
+              background: 'rgba(248,113,113,0.07)',
+              borderColor: 'rgba(248,113,113,0.25)',
+            }}
+          >
             {saveState.error}
           </p>
         )}
         {saveState?.success && (
-          <p className="text-xs text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2">
+          <p
+            className="text-xs rounded-lg border px-3 py-2"
+            style={{
+              color: 'var(--c-online)',
+              background: 'rgba(34,211,238,0.06)',
+              borderColor: 'rgba(34,211,238,0.2)',
+            }}
+          >
             Webhook salvo com sucesso.
           </p>
         )}
 
         <button
           type="submit"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors"
+          style={{ background: 'var(--c-accent)' }}
         >
           Salvar
         </button>
       </form>
 
+      {/* Test + remove */}
       {isConfigured && (
-        <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+        <div
+          className="flex flex-wrap items-center gap-3 pt-3 border-t"
+          style={{ borderColor: 'var(--c-border)' }}
+        >
           <button
             type="button"
             onClick={handleTest}
             disabled={testPending}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-50"
+            style={{
+              color: 'var(--c-muted)',
+              borderColor: 'var(--c-borderhi)',
+              background: 'transparent',
+            }}
           >
             {testPending ? (
-              <svg className="animate-spin w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin w-3 h-3" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
@@ -101,16 +168,28 @@ export function WebhookForm({ maskedUrl, isConfigured }: Props) {
             type="button"
             onClick={handleRemove}
             disabled={removePending}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors disabled:opacity-50"
+            style={{
+              color: 'var(--c-offline)',
+              borderColor: 'rgba(248,113,113,0.25)',
+              background: 'transparent',
+            }}
           >
             {removePending ? 'Removendo…' : 'Remover webhook'}
           </button>
 
           {testResult?.success && (
-            <span className="text-xs text-green-700 font-medium">Mensagem enviada.</span>
+            <span
+              className="text-xs font-medium"
+              style={{ color: 'var(--c-online)' }}
+            >
+              Mensagem enviada.
+            </span>
           )}
           {testResult?.error && (
-            <span className="text-xs text-red-600">{testResult.error}</span>
+            <span className="text-xs" style={{ color: 'var(--c-offline)' }}>
+              {testResult.error}
+            </span>
           )}
         </div>
       )}

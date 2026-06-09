@@ -24,18 +24,24 @@ export function ToggleActive({ serviceId, isActive }: ToggleActiveProps) {
     <button
       onClick={handleToggle}
       title={optimisticActive ? 'Desativar serviço' : 'Ativar serviço'}
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold tracking-wide border transition-colors"
+      style={
         optimisticActive
-          ? 'bg-green-100 text-green-700 hover:bg-green-200'
-          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-      }`}
+          ? {
+              color: 'var(--c-online)',
+              borderColor: 'rgba(34,211,238,0.25)',
+              background: 'rgba(34,211,238,0.07)',
+              fontFamily: 'var(--font-ibm-mono)',
+            }
+          : {
+              color: 'var(--c-muted)',
+              borderColor: 'var(--c-border)',
+              background: 'transparent',
+              fontFamily: 'var(--font-ibm-mono)',
+            }
+      }
     >
-      <span
-        className={`w-1.5 h-1.5 rounded-full ${
-          optimisticActive ? 'bg-green-500' : 'bg-gray-400'
-        }`}
-      />
-      {optimisticActive ? 'Ativo' : 'Inativo'}
+      {optimisticActive ? 'ATIVO' : 'INATIVO'}
     </button>
   )
 }

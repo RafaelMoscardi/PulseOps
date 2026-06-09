@@ -5,6 +5,15 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
+const inputClass = [
+  'w-full rounded-lg px-3 py-2.5 text-sm transition-colors',
+  'text-slate-200 placeholder-[#334155]',
+  'bg-[#0f1822] border border-[#1e3048]',
+  'focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500',
+].join(' ')
+
+const labelClass = 'block text-[11px] font-semibold tracking-widest uppercase mb-1.5 text-[#475569]'
+
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -37,48 +46,55 @@ function LoginForm() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">Entrar na conta</h2>
+    <div
+      className="rounded-xl border p-7"
+      style={{
+        background: 'var(--c-surface)',
+        borderColor: 'var(--c-border)',
+      }}
+    >
+      <h2
+        className="text-lg font-semibold mb-6"
+        style={{ color: 'var(--c-text)' }}
+      >
+        Acessar conta
+      </h2>
 
       {registered && (
-        <div className="rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 mb-4">
-          Conta criada com sucesso! Faça login para continuar.
+        <div className="rounded-lg border border-emerald-800/60 bg-emerald-950/40 text-emerald-400 text-xs px-4 py-3 mb-4">
+          Conta criada. Faça login para continuar.
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">
+          <div className="rounded-lg border border-red-800/60 bg-red-950/40 text-red-400 text-xs px-4 py-3">
             {error}
           </div>
         )}
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
+          <label htmlFor="email" className={labelClass}>Email</label>
           <input
             id="email"
             name="email"
             type="email"
             required
             autoComplete="email"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className={inputClass}
             placeholder="seu@email.com"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Senha
-          </label>
+          <label htmlFor="password" className={labelClass}>Senha</label>
           <input
             id="password"
             name="password"
             type="password"
             required
             autoComplete="current-password"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className={inputClass}
             placeholder="••••••••"
           />
         </div>
@@ -86,16 +102,24 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+          style={{ background: 'var(--c-accent)' }}
         >
-          {loading ? 'Entrando...' : 'Entrar'}
+          {loading ? 'Verificando…' : 'Entrar'}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-gray-500">
-        Não tem conta?{' '}
-        <Link href="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-          Cadastre-se gratuitamente
+      <p
+        className="mt-5 text-center text-xs"
+        style={{ color: 'var(--c-muted)' }}
+      >
+        Sem conta?{' '}
+        <Link
+          href="/register"
+          className="font-medium transition-colors hover:text-sky-300"
+          style={{ color: 'var(--c-accent)' }}
+        >
+          Cadastre-se
         </Link>
       </p>
     </div>
@@ -104,7 +128,20 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="bg-white rounded-2xl shadow-xl p-8 text-center text-gray-400">Carregando...</div>}>
+    <Suspense
+      fallback={
+        <div
+          className="rounded-xl border p-7 text-center text-xs"
+          style={{
+            background: 'var(--c-surface)',
+            borderColor: 'var(--c-border)',
+            color: 'var(--c-muted)',
+          }}
+        >
+          Carregando…
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   )

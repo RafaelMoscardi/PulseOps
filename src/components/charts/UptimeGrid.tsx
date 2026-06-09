@@ -8,13 +8,13 @@ type Props = {
 }
 
 function cellColor(day: DayStats): string {
-  if (day.total === 0) return '#e5e7eb'
+  if (day.total === 0) return '#1e293b'
   const p = day.online / day.total
-  if (p >= 0.99) return '#22c55e'
-  if (p >= 0.95) return '#86efac'
-  if (p >= 0.75) return '#facc15'
-  if (p >= 0.50) return '#fb923c'
-  return '#ef4444'
+  if (p >= 0.99) return '#22d3ee'
+  if (p >= 0.95) return '#0891b2'
+  if (p >= 0.75) return '#d97706'
+  if (p >= 0.50) return '#c2410c'
+  return '#b91c1c'
 }
 
 function cellTitle(day: DayStats): string {

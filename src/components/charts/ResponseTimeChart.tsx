@@ -15,7 +15,7 @@ export function ResponseTimeChart({ checks }: Props) {
   const online = checks.filter((c) => c.isOnline && c.responseMs != null)
   if (online.length < 3) {
     return (
-      <div className="h-20 flex items-center justify-center text-xs text-gray-300 italic">
+      <div className="h-20 flex items-center justify-center text-xs italic" style={{ color: 'var(--c-dim)' }}>
         Sem dados suficientes para o gráfico
       </div>
     )
@@ -63,7 +63,7 @@ export function ResponseTimeChart({ checks }: Props) {
             y1={(PY + f * (H - PY * 2)).toFixed(1)}
             x2={W}
             y2={(PY + f * (H - PY * 2)).toFixed(1)}
-            stroke="#f3f4f6"
+            stroke="#16212e"
             strokeWidth={1}
           />
         ))}
@@ -76,8 +76,8 @@ export function ResponseTimeChart({ checks }: Props) {
               y={0}
               width={Math.max(1, W / n)}
               height={H}
-              fill="#fecaca"
-              opacity={0.4}
+              fill="#f87171"
+              opacity={0.15}
             />
           ) : null
         )}
@@ -87,7 +87,7 @@ export function ResponseTimeChart({ checks }: Props) {
             key={i}
             d={d}
             fill="none"
-            stroke="#6366f1"
+            stroke="#0ea5e9"
             strokeWidth={2}
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -95,10 +95,13 @@ export function ResponseTimeChart({ checks }: Props) {
         ))}
       </svg>
 
-      <div className="absolute top-0 right-0 flex flex-col justify-between h-20 py-1.5 pointer-events-none">
-        <span className="text-[10px] text-gray-300 leading-none">{Math.round(maxMs)}ms</span>
-        <span className="text-[10px] text-gray-300 leading-none">{Math.round(maxMs / 2)}ms</span>
-        <span className="text-[10px] text-gray-300 leading-none">0</span>
+      <div
+        className="absolute top-0 right-0 flex flex-col justify-between h-20 py-1.5 pointer-events-none text-[10px] leading-none"
+        style={{ color: 'var(--c-dim)', fontFamily: 'var(--font-ibm-mono)' }}
+      >
+        <span>{Math.round(maxMs)}ms</span>
+        <span>{Math.round(maxMs / 2)}ms</span>
+        <span>0</span>
       </div>
     </div>
   )

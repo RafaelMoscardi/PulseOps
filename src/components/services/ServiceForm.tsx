@@ -16,6 +16,15 @@ interface ServiceFormProps {
   submitLabel?: string
 }
 
+const inputClass = [
+  'w-full rounded-lg px-3 py-2.5 text-sm transition-colors',
+  'text-slate-200 placeholder-[#334155]',
+  'bg-[#0f1822] border border-[#1e3048]',
+  'focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500',
+].join(' ')
+
+const labelClass = 'block text-[11px] font-semibold tracking-widest uppercase mb-1.5'
+
 export function ServiceForm({
   action,
   defaultValues,
@@ -26,15 +35,22 @@ export function ServiceForm({
   return (
     <form action={formAction} className="space-y-5">
       {state.error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3">
+        <div
+          className="rounded-lg border px-4 py-3 text-xs"
+          style={{
+            color: 'var(--c-offline)',
+            background: 'rgba(248,113,113,0.07)',
+            borderColor: 'rgba(248,113,113,0.25)',
+          }}
+        >
           {state.error}
         </div>
       )}
 
       {/* Nome */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-          Nome do serviço <span className="text-red-500">*</span>
+        <label htmlFor="name" className={labelClass} style={{ color: 'var(--c-muted)' }}>
+          Nome do serviço <span style={{ color: 'var(--c-offline)' }}>*</span>
         </label>
         <input
           id="name"
@@ -44,14 +60,14 @@ export function ServiceForm({
           maxLength={100}
           defaultValue={defaultValues?.name}
           placeholder="Minha API de Produção"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className={inputClass}
         />
       </div>
 
       {/* URL */}
       <div>
-        <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
-          URL <span className="text-red-500">*</span>
+        <label htmlFor="url" className={labelClass} style={{ color: 'var(--c-muted)' }}>
+          URL <span style={{ color: 'var(--c-offline)' }}>*</span>
         </label>
         <input
           id="url"
@@ -60,19 +76,19 @@ export function ServiceForm({
           required
           defaultValue={defaultValues?.url}
           placeholder="https://api.meusite.com/health"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className={inputClass}
         />
-        <p className="mt-1 text-xs text-gray-400">
-          Use HTTP ou HTTPS. O endpoint será verificado periodicamente.
+        <p className="mt-1.5 text-[11px]" style={{ color: 'var(--c-dim)' }}>
+          HTTP ou HTTPS. O endpoint será verificado periodicamente.
         </p>
       </div>
 
       {/* Intervalo */}
       <div>
-        <label htmlFor="intervalMinutes" className="block text-sm font-medium text-gray-700 mb-1">
-          Intervalo de verificação <span className="text-red-500">*</span>
+        <label htmlFor="intervalMinutes" className={labelClass} style={{ color: 'var(--c-muted)' }}>
+          Intervalo <span style={{ color: 'var(--c-offline)' }}>*</span>
         </label>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <input
             id="intervalMinutes"
             name="intervalMinutes"
@@ -81,9 +97,11 @@ export function ServiceForm({
             min={1}
             max={1440}
             defaultValue={defaultValues?.intervalMinutes ?? 5}
-            className="w-28 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className={inputClass + ' w-28'}
           />
-          <span className="text-sm text-gray-500">minutos (mín. 1, máx. 1440)</span>
+          <span className="text-xs" style={{ color: 'var(--c-muted)' }}>
+            minutos (1–1440)
+          </span>
         </div>
       </div>
 
@@ -94,25 +112,35 @@ export function ServiceForm({
           name="isActive"
           type="checkbox"
           defaultChecked={defaultValues?.isActive ?? true}
-          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+          className="h-4 w-4 rounded cursor-pointer accent-sky-500"
+          style={{ borderColor: 'var(--c-borderhi)' }}
         />
-        <label htmlFor="isActive" className="text-sm font-medium text-gray-700 cursor-pointer">
+        <label
+          htmlFor="isActive"
+          className="text-sm font-medium cursor-pointer"
+          style={{ color: 'var(--c-text)' }}
+        >
           Ativar monitoramento imediatamente
         </label>
       </div>
 
       {/* Ações */}
-      <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+      <div
+        className="flex items-center justify-end gap-3 pt-4 border-t"
+        style={{ borderColor: 'var(--c-border)' }}
+      >
         <Link
           href="/services"
-          className="rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+          style={{ color: 'var(--c-muted)' }}
         >
           Cancelar
         </Link>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ background: 'var(--c-accent)' }}
         >
           {pending ? 'Salvando…' : submitLabel}
         </button>

@@ -21,20 +21,22 @@ export function DeleteButton({ serviceId, serviceName }: DeleteButtonProps) {
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500 hidden sm:block">
-          Excluir &quot;{serviceName}&quot;?
+        <span className="text-[11px] hidden sm:block" style={{ color: 'var(--c-muted)' }}>
+          Excluir?
         </span>
         <button
           onClick={handleDelete}
           disabled={isPending}
-          className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-500 disabled:opacity-50 transition-colors"
+          className="rounded-md px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-50 transition-colors"
+          style={{ background: 'var(--c-offline)' }}
         >
           {isPending ? 'Excluindo…' : 'Confirmar'}
         </button>
         <button
           onClick={() => setConfirming(false)}
           disabled={isPending}
-          className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          className="rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors"
+          style={{ color: 'var(--c-muted)' }}
         >
           Cancelar
         </button>
@@ -45,7 +47,9 @@ export function DeleteButton({ serviceId, serviceName }: DeleteButtonProps) {
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="rounded-md px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+      className="rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors"
+      style={{ color: 'var(--c-muted)' }}
+      title={`Excluir ${serviceName}`}
     >
       Excluir
     </button>

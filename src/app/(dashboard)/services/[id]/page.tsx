@@ -58,7 +58,6 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
     orderBy: { checkedAt: 'asc' },
   })
 
-  // --- Stats ---
   const lastCheck = service.checks[0]
   const openIncident = service.incidents.find((i) => !i.isResolved)
 
@@ -73,7 +72,6 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
       ? Math.round(onlineChecks.reduce((s, c) => s + c.responseMs!, 0) / onlineChecks.length)
       : null
 
-  // --- 90-day uptime grid ---
   const dayMap = new Map<string, { total: number; online: number }>()
   for (const c of checks90d) {
     const key = c.checkedAt.toISOString().slice(0, 10)
@@ -90,35 +88,64 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
     return dayMap.get(key) ?? { total: 0, online: 0 }
   })
 
-  // --- Chart data (oldest first) ---
   const chartChecks = [...service.checks].reverse()
 
+  const isOnline = lastCheck?.isOnline === true
+  const statusColor = !lastCheck
+    ? 'var(--c-muted)'
+    : isOnline
+    ? 'var(--c-online)'
+    : 'var(--c-offline)'
+
+  const uptimeColor =
+    uptime90 == null
+      ? 'var(--c-muted)'
+      : uptime90 >= 99
+      ? 'var(--c-online)'
+      : uptime90 >= 95
+      ? 'var(--c-warning)'
+      : 'var(--c-offline)'
+
+  const cardStyle = {
+    background: 'var(--c-surface)',
+    borderColor: 'var(--c-border)',
+  }
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-5">
       {/* Header */}
       <div>
         <Link
           href="/services"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors mb-4"
+          className="inline-flex items-center gap-1 text-xs mb-4 transition-colors"
+          style={{ color: 'var(--c-muted)' }}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Voltar para Serviços
+          Serviços
         </Link>
 
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <h2 className="text-2xl font-bold text-gray-900">{service.name}</h2>
+            <div className="flex items-center gap-2.5 flex-wrap mb-1">
+              <h1
+                className="text-xl font-semibold"
+                style={{ color: 'var(--c-text)' }}
+              >
+                {service.name}
+              </h1>
               {openIncident && (
-                <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                  Incidente aberto
-                </span>
-              )}
-              {!lastCheck && (
-                <span className="text-xs font-medium text-gray-400 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full">
-                  Aguardando primeira verificação
+                <span
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full border"
+                  style={{
+                    color: 'var(--c-warning)',
+                    borderColor: 'rgba(251,146,60,0.3)',
+                    background: 'rgba(251,146,60,0.08)',
+                    fontFamily: 'var(--font-ibm-mono)',
+                  }}
+                >
+                  INCIDENTE ABERTO
                 </span>
               )}
             </div>
@@ -126,7 +153,8 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
               href={service.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-gray-400 hover:text-indigo-600 transition-colors break-all"
+              className="text-xs break-all transition-colors"
+              style={{ color: 'var(--c-muted)' }}
             >
               {service.url}
             </a>
@@ -135,7 +163,11 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
             <CheckNowButton serviceId={service.id} />
             <Link
               href={`/services/${service.id}/edit`}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors"
+              style={{
+                color: 'var(--c-muted)',
+                borderColor: 'var(--c-border)',
+              }}
             >
               Editar
             </Link>
@@ -143,94 +175,122 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
         </div>
       </div>
 
-      {/* Stat cards */}
+      {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           {
             label: 'Status',
-            value: !lastCheck ? '—' : lastCheck.isOnline ? 'Online' : 'Offline',
-            color: !lastCheck
-              ? 'text-gray-400'
-              : lastCheck.isOnline
-              ? 'text-green-600'
-              : 'text-red-600',
+            value: !lastCheck ? '—' : isOnline ? 'ONLINE' : 'OFFLINE',
+            color: statusColor,
           },
           {
-            label: 'Última resposta',
+            label: 'Última resp.',
             value: lastCheck?.responseMs != null ? `${lastCheck.responseMs}ms` : '—',
-            color: 'text-gray-900',
+            color: 'var(--c-text)',
           },
           {
-            label: 'Média (50 checks)',
+            label: 'Média 50ch',
             value: avgResponseMs != null ? `${avgResponseMs}ms` : '—',
-            color: 'text-gray-900',
+            color: 'var(--c-text)',
           },
           {
             label: 'Uptime 90d',
             value: uptime90 != null ? `${uptime90.toFixed(1)}%` : '—',
-            color:
-              uptime90 == null
-                ? 'text-gray-400'
-                : uptime90 >= 99
-                ? 'text-green-600'
-                : uptime90 >= 95
-                ? 'text-yellow-600'
-                : 'text-red-600',
+            color: uptimeColor,
           },
           {
             label: 'Intervalo',
-            value: `${service.intervalMinutes} min`,
-            color: 'text-gray-900',
+            value: `${service.intervalMinutes}min`,
+            color: 'var(--c-text)',
           },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide truncate">
+          <div
+            key={s.label}
+            className="rounded-xl border p-4"
+            style={cardStyle}
+          >
+            <p
+              className="text-[10px] font-semibold tracking-widest uppercase"
+              style={{ color: 'var(--c-muted)' }}
+            >
               {s.label}
             </p>
-            <p className={`text-xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+            <p
+              className="text-xl font-semibold mt-2 leading-none"
+              style={{
+                color: s.color,
+                fontFamily: 'var(--font-ibm-mono)',
+              }}
+            >
+              {s.value}
+            </p>
           </div>
         ))}
       </div>
 
       {/* Response time chart */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Tempo de Resposta</h3>
-          <span className="text-xs text-gray-400">últimos {service.checks.length} checks</span>
+      <div className="rounded-xl border" style={cardStyle}>
+        <div
+          className="px-5 py-4 border-b flex items-center justify-between"
+          style={{ borderColor: 'var(--c-border)' }}
+        >
+          <h3
+            className="text-[11px] font-semibold tracking-widest uppercase"
+            style={{ color: 'var(--c-muted)' }}
+          >
+            Tempo de Resposta
+          </h3>
+          <span
+            className="text-[11px]"
+            style={{ color: 'var(--c-dim)', fontFamily: 'var(--font-ibm-mono)' }}
+          >
+            últimos {service.checks.length} checks
+          </span>
         </div>
-        <div className="px-6 py-4">
+        <div className="px-5 py-4">
           <ResponseTimeChart checks={chartChecks} />
         </div>
       </div>
 
       {/* Uptime grid */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Disponibilidade — 90 dias</h3>
+      <div className="rounded-xl border" style={cardStyle}>
+        <div
+          className="px-5 py-4 border-b flex items-center justify-between"
+          style={{ borderColor: 'var(--c-border)' }}
+        >
+          <h3
+            className="text-[11px] font-semibold tracking-widest uppercase"
+            style={{ color: 'var(--c-muted)' }}
+          >
+            Disponibilidade — 90 dias
+          </h3>
           {uptime90 != null && (
             <span
-              className={`text-xs font-semibold ${
-                uptime90 >= 99
-                  ? 'text-green-600'
-                  : uptime90 >= 95
-                  ? 'text-yellow-600'
-                  : 'text-red-600'
-              }`}
+              className="text-sm font-semibold"
+              style={{
+                color: uptimeColor,
+                fontFamily: 'var(--font-ibm-mono)',
+              }}
             >
               {uptime90.toFixed(2)}%
             </span>
           )}
         </div>
-        <div className="px-6 py-5">
+        <div className="px-5 py-5">
           <UptimeGrid days={uptimeDays} />
           <div className="flex items-center gap-2 mt-3">
-            <span className="text-xs text-gray-400">Menos</span>
+            <span
+              className="text-[10px]"
+              style={{ color: 'var(--c-dim)' }}
+            >
+              Menos
+            </span>
             {[
-              { color: '#e5e7eb', label: 'Sem dados' },
-              { color: '#ef4444', label: '< 50%' },
-              { color: '#fb923c', label: '50–75%' },
-              { color: '#86efac', label: '95–99%' },
-              { color: '#22c55e', label: '≥ 99%' },
+              { color: '#1e293b', label: 'Sem dados' },
+              { color: '#7f1d1d', label: '< 50%' },
+              { color: '#c2410c', label: '50–75%' },
+              { color: '#15803d', label: '95–99%' },
+              { color: '#22d3ee', label: '≥ 99%' },
             ].map((l) => (
               <div
                 key={l.label}
@@ -239,47 +299,84 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
                 className="w-3 h-3 rounded-sm"
               />
             ))}
-            <span className="text-xs text-gray-400">Mais</span>
+            <span
+              className="text-[10px]"
+              style={{ color: 'var(--c-dim)' }}
+            >
+              Mais
+            </span>
           </div>
         </div>
       </div>
 
       {/* Incidents */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-900">Histórico de Incidentes</h3>
+      <div className="rounded-xl border" style={cardStyle}>
+        <div
+          className="px-5 py-4 border-b"
+          style={{ borderColor: 'var(--c-border)' }}
+        >
+          <h3
+            className="text-[11px] font-semibold tracking-widest uppercase"
+            style={{ color: 'var(--c-muted)' }}
+          >
+            Histórico de Incidentes
+          </h3>
         </div>
         {service.incidents.length === 0 ? (
-          <div className="px-6 py-12 text-center">
-            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center mx-auto mb-3">
-              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex flex-col items-center py-10 text-center">
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center mb-3"
+              style={{ background: 'rgba(34,211,238,0.08)', border: '1px solid rgba(34,211,238,0.15)' }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--c-online)' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-gray-700">Nenhum incidente registrado</p>
-            <p className="text-xs text-gray-400 mt-1">Este serviço nunca ficou offline.</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--c-text)' }}>
+              Nenhum incidente registrado
+            </p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul>
             {service.incidents.map((incident) => (
-              <li key={incident.id} className="px-6 py-4 flex items-start gap-4">
+              <li
+                key={incident.id}
+                className="px-5 py-4 flex items-start gap-4 border-b last:border-b-0"
+                style={{ borderColor: 'var(--c-border)' }}
+              >
                 <span
-                  className={`mt-0.5 inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full shrink-0 ${
+                  className="mt-0.5 shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
+                  style={
                     incident.isResolved
-                      ? 'bg-green-50 text-green-700 border border-green-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
-                  }`}
+                      ? {
+                          color: 'var(--c-online)',
+                          borderColor: 'rgba(34,211,238,0.25)',
+                          background: 'rgba(34,211,238,0.07)',
+                          fontFamily: 'var(--font-ibm-mono)',
+                        }
+                      : {
+                          color: 'var(--c-warning)',
+                          borderColor: 'rgba(251,146,60,0.3)',
+                          background: 'rgba(251,146,60,0.08)',
+                          fontFamily: 'var(--font-ibm-mono)',
+                        }
+                  }
                 >
-                  {incident.isResolved ? 'Resolvido' : 'Aberto'}
+                  {incident.isResolved ? 'OK' : 'ABERTO'}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700">{incident.reason ?? 'Sem detalhes'}</p>
-                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-400">
-                    <span>Início: {fmt(incident.startedAt)}</span>
-                    <span>· Duração: {duration(incident.startedAt, incident.resolvedAt)}</span>
-                    {incident.resolvedAt && (
-                      <span>· Resolução: {fmt(incident.resolvedAt)}</span>
-                    )}
+                  <p className="text-xs" style={{ color: 'var(--c-text)' }}>
+                    {incident.reason ?? 'Sem detalhes'}
+                  </p>
+                  <div
+                    className="flex flex-wrap gap-3 mt-1 text-[11px]"
+                    style={{
+                      color: 'var(--c-muted)',
+                      fontFamily: 'var(--font-ibm-mono)',
+                    }}
+                  >
+                    <span>{fmt(incident.startedAt)}</span>
+                    <span>· {duration(incident.startedAt, incident.resolvedAt)}</span>
                   </div>
                 </div>
               </li>
@@ -289,38 +386,69 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
       </div>
 
       {/* Recent checks */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-gray-900">Últimas Verificações</h3>
-          <span className="text-xs text-gray-400">{service.checks.length} registros</span>
+      <div className="rounded-xl border" style={cardStyle}>
+        <div
+          className="px-5 py-4 border-b flex items-center justify-between"
+          style={{ borderColor: 'var(--c-border)' }}
+        >
+          <h3
+            className="text-[11px] font-semibold tracking-widest uppercase"
+            style={{ color: 'var(--c-muted)' }}
+          >
+            Últimas Verificações
+          </h3>
+          <span
+            className="text-[11px]"
+            style={{ color: 'var(--c-dim)', fontFamily: 'var(--font-ibm-mono)' }}
+          >
+            {service.checks.length} registros
+          </span>
         </div>
         {service.checks.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm text-gray-400">
+          <div className="px-5 py-8 text-center text-xs" style={{ color: 'var(--c-muted)' }}>
             Nenhuma verificação ainda. Clique em &ldquo;Verificar agora&rdquo; para iniciar.
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul>
             {service.checks.map((check) => (
-              <li key={check.id} className="px-6 py-3 flex items-center gap-4">
+              <li
+                key={check.id}
+                className="px-5 py-3 flex items-center gap-3 border-b last:border-b-0"
+                style={{ borderColor: 'var(--c-border)' }}
+              >
                 <span
-                  className={`w-2 h-2 rounded-full shrink-0 ${
-                    check.isOnline ? 'bg-green-500' : 'bg-red-500'
-                  }`}
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  style={{
+                    background: check.isOnline ? 'var(--c-online)' : 'var(--c-offline)',
+                  }}
                 />
                 <span
-                  className={`text-xs font-medium w-14 shrink-0 ${
-                    check.isOnline ? 'text-green-600' : 'text-red-600'
-                  }`}
+                  className="text-[11px] font-semibold w-14 shrink-0"
+                  style={{
+                    color: check.isOnline ? 'var(--c-online)' : 'var(--c-offline)',
+                    fontFamily: 'var(--font-ibm-mono)',
+                  }}
                 >
-                  {check.isOnline ? 'Online' : 'Offline'}
+                  {check.isOnline ? 'OK' : 'FAIL'}
                 </span>
-                <span className="text-xs text-gray-500 w-16 shrink-0">
+                <span
+                  className="text-[11px] w-16 shrink-0"
+                  style={{ color: 'var(--c-muted)', fontFamily: 'var(--font-ibm-mono)' }}
+                >
                   {check.responseMs != null ? `${check.responseMs}ms` : '—'}
                 </span>
-                <span className="text-xs text-gray-400 flex-1 truncate">
+                <span
+                  className="text-[11px] flex-1 truncate"
+                  style={{ color: 'var(--c-dim)', fontFamily: 'var(--font-ibm-mono)' }}
+                >
                   {check.statusCode ? `HTTP ${check.statusCode}` : check.error ?? ''}
                 </span>
-                <span className="text-xs text-gray-400 shrink-0">{fmt(check.checkedAt)}</span>
+                <span
+                  className="text-[11px] shrink-0"
+                  style={{ color: 'var(--c-muted)', fontFamily: 'var(--font-ibm-mono)' }}
+                >
+                  {fmt(check.checkedAt)}
+                </span>
               </li>
             ))}
           </ul>
